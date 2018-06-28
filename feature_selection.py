@@ -64,6 +64,28 @@ for col in cols:
     corrlation[col]=m.mic()
 pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=False)
 
+# 互信息法筛选
+def mutual_info_select(train,train_y):
+	from sklearn.feature_selection import SelectKBest
+	from sklearn.feature_selection import mutual_info_classif
+	score=0
+	index=1
+	for i in range(1,train.shape[1]+1):
+		model=SelectKBest(mutual_info_classif,k=i)
+		a_train=model.fit_transform(train,train_y)
+		
+		clf = GBC(random_state=0)
+		cv_score=cross_val_score(clf, a_train, train_y, cv=cv, scoring='recall').mean()
+		if score<cv_score:
+			score=cv_score
+			index=i
+		print i,round(cv_score,4)
+	print "______________________"
+	print index,score
+	# 被删除的特征
+	model=SelectKBest(mutual_info_classif,k=index).fit(train,train_y)
+	train.columns[~model.get_support()]
+
 # 基于相关系数的假设检验
 def f_classif_select(train,train_y):
 	from sklearn.feature_selection import SelectKBest
@@ -105,21 +127,21 @@ clf.fit(train,train_y)
 print train.columns[~clf.support_],np.max(clf.grid_scores_)
 
 # 基于L1的LR特征选择
-def L1_select(train,train_y):
+def L1_select(train,train_y,a,b,step,c):
 	from sklearn.feature_selection import SelectFromModel
 	score=0
 	index=0
 	clf1=LogsiticRegreesion(penalty="l1").fit(train.values, train_y.values.reshape(-1,1))
-	for i in range(60,160,5):
-		model = SelectFromModel(clf1,threshold=i/100000.0)
+	for i in range(a,b,step):
+		model = SelectFromModel(clf1,threshold=i/c)
 		model.fit(train,train_y)
 		train1=model.transform(train)
 		clf =GBC(random_state=0)
 		cv_score=cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
-			index=i/100000.0
-		print i/100000.0,cv_score
+			index=i/c
+		print i/c,cv_score
 	print
 	print index,score
 
@@ -134,22 +156,22 @@ print round(cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean(
 
 
 # 基于GDBT的特征选择
-def gdbt_select(train,train_y):
+def gdbt_select(train,train_y,a,b,step,c):
 	from sklearn.feature_selection import SelectFromModel
 
 	score=0
 	index=0
 	clf1=GBC(random_state=0).fit(train.values, train_y.values.reshape(-1,1))
-	for i in range(250,350,10):
-		model = SelectFromModel(clf1,threshold=i/10000.0)
+	for i in range(a,b,step):
+		model = SelectFromModel(clf1,threshold=i/c)
 		model.fit(train,train_y)
 		train1=model.transform(train)
 		clf =GBC(random_state=0)
 		cv_score=cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
-			index=i/10000.0
-		print i/10000.0,cv_score
+			index=i/c
+		print i/c,cv_score
 	print
 	print index,score
 
