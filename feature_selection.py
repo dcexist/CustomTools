@@ -5,7 +5,7 @@ from sklearn.ensemble import GradientBoostingClassifier as GBC
 # 交叉验证
 from sklearn.model_selection import StratifiedKFold
 cv=StratifiedKFold(n_splits=5, random_state=0, shuffle=False)
-cross_val_score(clf, X, y, cv=cv, scoring='precision').mean())
+cross_val_score(clf, train, train_y, cv=cv, scoring='precision').mean())
 
 
 # 方差筛选
@@ -184,6 +184,7 @@ print train.columns[~model.get_support()]
 print round(cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean(),4)
 
 '''
+makedown 语法：
 #### 小结
 - 方差筛选
     - discarded feature: None
