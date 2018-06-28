@@ -5,7 +5,7 @@ from sklearn.ensemble import GradientBoostingClassifier as GBC
 # 交叉验证
 from sklearn.model_selection import StratifiedKFold
 cv=StratifiedKFold(n_splits=5, random_state=0, shuffle=False)
-cross_val_score(clf, train, train_y, cv=cv, scoring='precision').mean())
+cross_val_score(model, train, train_y, cv=cv, scoring='precision').mean())
 
 
 # 方差筛选
@@ -20,8 +20,8 @@ def variance_select(train,train_y,a,b,step,c)：
 		selector.fit(train)
 		train1=selector.transform(train)
 		
-		clf=GBC(random_state=0)
-		print round(cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean(),4)
+		model=GBC(random_state=0)
+		print round(cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean(),4)
 		print "_____________________________________"
 
 		
@@ -41,8 +41,8 @@ def chi2_select(train,train_y):
 		model=SelectKBest(chi2,k=i)
 		train1=model.fit_transform(train,train_y)
 		
-		clf=GBC(random_state=0)
-		cv_score=cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean()
+		model=GBC(random_state=0)
+		cv_score=cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
 			index=i
@@ -74,8 +74,8 @@ def mutual_info_select(train,train_y):
 		model=SelectKBest(mutual_info_classif,k=i)
 		a_train=model.fit_transform(train,train_y)
 		
-		clf = GBC(random_state=0)
-		cv_score=cross_val_score(clf, a_train, train_y, cv=cv, scoring='recall').mean()
+		model = GBC(random_state=0)
+		cv_score=cross_val_score(model, a_train, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
 			index=i
@@ -96,8 +96,8 @@ def f_classif_select(train,train_y):
 		model=SelectKBest(f_classif,k=i)
 		train1=model.fit_transform(train,train_y)
 		
-		clf = GBC(random_state=0)
-		cv_score=cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean()
+		model = GBC(random_state=0)
+		cv_score=cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
 			index=i
@@ -108,12 +108,12 @@ def f_classif_select(train,train_y):
 	train.columns[~model.get_support()]
 	
 # 基于GDBT的单变量特征选择
-clf =GBC(random_state=0)
+model =GBC(random_state=0)
 scores=[]
 columns=train.columns
 corrlation={}
 for i in range(train.shape[1]):
-    score=cross_val_score(clf,train.values[:,i:i+1],train_y.reshape(-1,1),scoring='recall',
+    score=cross_val_score(model,train.values[:,i:i+1],train_y.reshape(-1,1),scoring='recall',
                           cv=cv)
     corrlation[columns[i]]=format(np.mean(score),'.4f')
 pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=False)
@@ -121,23 +121,23 @@ pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=F
 # 递归特征消除
 # 通过交叉验证自动确定消除特征数目
 from sklearn.feature_selection import RFECV
-clf=RFECV(estimator=GBC(random_state=0),step=1,cv=cv,scoring='recall')
-clf.fit(train,train_y)
+model=RFECV(estimator=GBC(random_state=0),step=1,cv=cv,scoring='recall')
+model.fit(train,train_y)
 # 被消除的特征
-print train.columns[~clf.support_],np.max(clf.grid_scores_)
+print train.columns[~model.support_],np.max(model.grid_scores_)
 
 # 基于L1的LR特征选择
 def L1_select(train,train_y,a,b,step,c):
 	from sklearn.feature_selection import SelectFromModel
 	score=0
 	index=0
-	clf1=LogsiticRegreesion(penalty="l1").fit(train.values, train_y.values.reshape(-1,1))
+	model1=LogsiticRegreesion(penalty="l1").fit(train.values, train_y.values.reshape(-1,1))
 	for i in range(a,b,step):
-		model = SelectFromModel(clf1,threshold=i/c)
+		model = SelectFromModel(model1,threshold=i/c)
 		model.fit(train,train_y)
 		train1=model.transform(train)
-		clf =GBC(random_state=0)
-		cv_score=cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean()
+		model =GBC(random_state=0)
+		cv_score=cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
 			index=i/c
@@ -145,14 +145,14 @@ def L1_select(train,train_y,a,b,step,c):
 	print
 	print index,score
 
-clf1=LR(penalty="l1").fit(train.values, train_y.values.reshape(-1,1))
-model = SelectFromModel(clf1,threshold=index)
+model1=LR(penalty="l1").fit(train.values, train_y.values.reshape(-1,1))
+model = SelectFromModel(model1,threshold=index)
 model.fit(train,train_y)
 train1=model.transform(train)
 
-clf =GBC(random_state=0)
+model =GBC(random_state=0)
 print train.columns[~model.get_support()]
-print round(cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean(),4)
+print round(cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean(),4)
 
 
 # 基于GDBT的特征选择
@@ -161,13 +161,13 @@ def gdbt_select(train,train_y,a,b,step,c):
 
 	score=0
 	index=0
-	clf1=GBC(random_state=0).fit(train.values, train_y.values.reshape(-1,1))
+	model1=GBC(random_state=0).fit(train.values, train_y.values.reshape(-1,1))
 	for i in range(a,b,step):
-		model = SelectFromModel(clf1,threshold=i/c)
+		model = SelectFromModel(model1,threshold=i/c)
 		model.fit(train,train_y)
 		train1=model.transform(train)
-		clf =GBC(random_state=0)
-		cv_score=cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean()
+		model =GBC(random_state=0)
+		cv_score=cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
 			index=i/c
@@ -175,16 +175,15 @@ def gdbt_select(train,train_y,a,b,step,c):
 	print
 	print index,score
 
-model = SelectFromModel(clf1,threshold=index)
+model = SelectFromModel(model1,threshold=index)
 model.fit(train,train_y)
 train1=model.transform(train)
 
-clf =GBC(random_state=0)
+model =GBC(random_state=0)
 print train.columns[~model.get_support()]
-print round(cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean(),4)
+print round(cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean(),4)
 
 '''
-makedown 语法：
 #### 小结
 - 方差筛选
     - discarded feature: None
