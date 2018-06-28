@@ -182,3 +182,31 @@ train1=model.transform(train)
 clf =GBC(random_state=0)
 print train.columns[~model.get_support()]
 print round(cross_val_score(clf, train1, train_y, cv=cv, scoring='recall').mean(),4)
+
+'''
+#### 小结
+- 方差筛选
+    - discarded feature: None
+    - recall score: 
+- 卡方检验
+    - discarded feature: 
+    - recall score:
+- 互信息法
+    - discarded feature: 
+    - recall score:
+- 基于相关系数的假设检验
+    - discarded feature: 
+    - recall score:
+- 基于GDBT的单变量特征选择
+    - discarded feature: 
+    - recall score:
+- 递归特征消除
+    - discarded feature:
+    - recall score:
+- 基于L1的LR特征选择
+    - discarded feature: 
+    - recall score:
+- 基于GDBT的特征选择
+    - discarded feature:
+    - recall score:
+'''
