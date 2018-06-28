@@ -90,7 +90,7 @@ def outlier():
 	
 	
 
-# 采样
+# 过采样和欠采样
 def sampling(train,train_y):
 	# 过抽样处理库SMOTE
 	from imblearn.over_sampling import SMOTE 
