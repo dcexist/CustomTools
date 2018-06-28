@@ -25,7 +25,7 @@ def variance_select(train,train_y,a,b,step,c)：
 		print "_____________________________________"
 
 		
-# 卡方检验
+# 分类-卡方检验
 from sklearn.feature_selection import chi2
 corrlation={}
 for i in range(train.shape[1]):
@@ -52,9 +52,26 @@ def chi2_select(train,train_y):
 	# 被删除的特征
 	model=SelectKBest(chi2,k=index).fit(train,train_y)
 	train.columns[~model.get_support()]
+
+# 回归-pearson系数筛选（|r|<=0.3为不存在线性相关；0.3<|r|<=0.5为低度线性相关；0.5<|r|<=0.8为显著线性相关；|r|>0.8为高度线性相关，r之和>1）	
+from scipy.stats import pearsonr
+cols=train.columns
+corrlation={}
+for col in cols:
+    values=pearsonr(train[col],train_y)
+    corrlation[col]=abs(values[0])
+pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=False)
+
+# 回归-spearman系数筛选
+from scipy.stats import spearmanr
+cols=train.columns
+corrlation={}
+for col in cols:
+    values=spearmanr(train[col],train_y)
+    corrlation[col]=abs(values[0])
+pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=False)
 	
-	
-# 最大信息系数
+# 最大信息系数,取值区间在[0，1],之和>1
 from minepy import MINE
 m=MINE()
 cols=train.columns
@@ -86,7 +103,7 @@ def mutual_info_select(train,train_y):
 	model=SelectKBest(mutual_info_classif,k=index).fit(train,train_y)
 	train.columns[~model.get_support()]
 
-# 基于相关系数的假设检验
+# 基于相关系数的假设检验(分类-f_classif,回归-f_regression)
 def f_classif_select(train,train_y):
 	from sklearn.feature_selection import SelectKBest
 	from sklearn.feature_selection import f_classif
