@@ -17,8 +17,38 @@ data.dtypes[data.dtypes=='object']
 # 删除无关特征
 data=data.drop(cols,axis=1)
 
+# 删除无关数据
+indexes=list(data[(data.user_watch<0.1)&(data.user_watch>1)].user_watch)
+data.drop(indexes)
+
 # 检查缺失值
 data.isnull().sum().sort_values()
+
+# 简单均值填充
+mean1=data[data['上映时间'].isnull()!=True]['上映时间'].mean()
+indexes=list(data[data['上映时间'].isnull()==True]['上映时间'].index)
+data.loc[indexes,'上映时间']=mean1
+	
+# 字符串类型one-hot编码
+data=pd.concat([data,pd.get_dummies(data['影片类型'])],axis=1)
+
+# 标签编码
+data['district']=preprocessing.LabelEncoder().fit_transform(data['地区'])
+
+# 多值层次标签，比如中国/成都/武侯区，可以进行字段提取
+data['len_location']=data['location'].map(lambda x: len(str(x).split('/')))
+for i in range(3):
+	data['location'+str(i)]=preprocessing.LabelEncoder().fit_transform(data['location'].map(lambda x:str(str(x).split('/')[i]) if len(str(x).split('/')) > i else ''))
+
+# 处理时间，10位时间戳转日期、年份、月等(13位时间戳/1000)
+'''
+data['show_time']=data['time'].apply(timestamp_datetime)
+data['show_time']=pd.to_datetime(data.show_time)
+data['year']=data.show_time.dt.year
+'''
+def timestamp_datetime(value):
+    value=time.localtime(value)
+    return time.strftime('%Y-%m-%d %H:%M:%S',value)
 
 # 划分训练集和测试集
 y=data.pop('label')
@@ -26,7 +56,7 @@ train,test,train_y,test_y=train_test_split(data,y,test_size=0.3,random_state=0)
 
 
 # 异常值检测
-def outlier():
+def outlier(df):
 	# 基于聚类的小簇划分法及离群点划分法
 
 	# 1.首先确定最佳簇的个数	
@@ -132,12 +162,3 @@ def discretize(data,col,k):
 	model.fit(data[col].reshape(-1,1))
 	data[col]=pd.DataFrame(model.labels_)
 
-# 处理时间，10位时间戳转日期、年份、月等(13位时间戳/1000)
-'''
-data['show_time']=data['time'].apply(timestamp_datetime)
-data['show_time']=pd.to_datetime(data.show_time)
-data['year']=data.show_time.dt.year
-'''
-def timestamp_datetime(value):
-    value=time.localtime(value)
-    return time.strftime('%Y-%m-%d %H:%M:%S',value)
