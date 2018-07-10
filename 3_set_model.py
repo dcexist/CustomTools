@@ -1,8 +1,14 @@
 from sklearn.ensemble import GradientBoostingClassifier as GBC
 from sklearn.ensemble import RandomForestClassifier as RF
+from sklearn.svm import SVC
 from sklearn.model_selection import KFold
+from sklearn.externals import joblib
 
-
+# SVM调参
+param1={'C':range(1,10,1)}
+gsearch1=GridSearchCV(estimator=SVC(),param_grid=param1,scoring='accuracy',n_jobs=4,iid=False,cv=5)
+gsearch1.fit(train,train_y)
+gsearch1.grid_scores_,gsearch1.best_params_,gsearch1.best_score_
 
 # Random Forest 调参
 
@@ -115,4 +121,5 @@ stacked_test = np.concatenate([f.reshape(-1, 1) for f in input_test], axis=1)
 model=GBC()
 model.fit(stacked_train, y_train)
 pred=model.predict(stacked_test)
-metrics.recall_score(test_y,pred),metrics.precision_score(test_y,pred)
+print metrics.recall_score(test_y,pred),metrics.precision_score(test_y,pred)
+joblib.dump(model,'../model/stacking_model.pkl')

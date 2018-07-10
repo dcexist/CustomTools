@@ -18,8 +18,11 @@ data.dtypes[data.dtypes=='object']
 data=data.drop(cols,axis=1)
 
 # 删除无关数据
-indexes=list(data[(data.user_watch<0.1)&(data.user_watch>1)].user_watch)
-data.drop(indexes)
+data=data[(data.user_watch>=0.1)&(data.user_watch<=1)]
+
+ids=data[0].value_counts()[data[0].value_counts()>3].index
+data1=data[data[0].isin(list(ids))]
+data2=data[~data[0].isin(list(ids))]
 
 # 检查缺失值
 data.isnull().sum().sort_values()
@@ -34,6 +37,11 @@ data=pd.concat([data,pd.get_dummies(data['影片类型'])],axis=1)
 
 # 标签编码
 data['district']=preprocessing.LabelEncoder().fit_transform(data['地区'])
+
+# 特征列含中文，当对中文字符串处理时，经常报错，需要做以下处理，现将特征列Unicode编码，再对单个字符串编码encode('utf-8'),然后才能转化为str类型：
+data['evs_director']=data['evs_director'].astype(unicode)											#unicode
+data['evs_director']=data['evs_director'].map(lambda x:' '.join(x.encode('utf-8').split('/')))		#encode('utf-8')
+data['evs_director']=data['evs_director'].astype(str)
 
 # 多值层次标签，比如中国/成都/武侯区，可以进行字段提取
 data['len_location']=data['location'].map(lambda x: len(str(x).split('/')))
