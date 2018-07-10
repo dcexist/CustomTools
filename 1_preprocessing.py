@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt 
 
+import time
+
 plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
 plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
 
@@ -130,3 +132,12 @@ def discretize(data,col,k):
 	model.fit(data[col].reshape(-1,1))
 	data[col]=pd.DataFrame(model.labels_)
 
+# 处理时间，10位时间戳转日期、年份、月等(13位时间戳/1000)
+'''
+data['show_time']=data['time'].apply(timestamp_datetime)
+data['show_time']=pd.to_datetime(data.show_time)
+data['year']=data.show_time.dt.year
+'''
+def timestamp_datetime(value):
+    value=time.localtime(value)
+    return time.strftime('%Y-%m-%d %H:%M:%S',value)
