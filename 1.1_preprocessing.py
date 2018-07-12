@@ -28,9 +28,7 @@ data2=data[~data[0].isin(list(ids))]
 data.isnull().sum().sort_values()
 
 # 简单均值填充
-mean1=data[data['上映时间'].isnull()!=True]['上映时间'].mean()
-indexes=list(data[data['上映时间'].isnull()==True]['上映时间'].index)
-data.loc[indexes,'上映时间']=mean1
+df=df.fillna(df.mean())
 	
 # 字符串类型one-hot编码
 data=pd.concat([data,pd.get_dummies(data['影片类型'])],axis=1)
