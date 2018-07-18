@@ -203,7 +203,7 @@ print train.columns[~model.get_support()]
 print round(cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean(),4)
 
 '''
-#### 小结
+### 小结
 - 方差筛选
     - discarded feature: None
     - recall score: 
