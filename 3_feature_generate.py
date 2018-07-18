@@ -16,4 +16,4 @@ print (train_new.todense())
 df['category1'].rank(ascending=False, method='max')
 
 # 缺失值统计特征
-df['x_null']=
+df['x_null']=df.isnull().sum(axis=1)
