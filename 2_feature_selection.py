@@ -7,7 +7,7 @@ model=GB(random_state=0)
 # 交叉验证
 from sklearn.model_selection import StratifiedKFold
 cv=StratifiedKFold(n_splits=5, random_state=0, shuffle=False)
-cross_val_score(model, train, train_y, cv=cv, scoring='precision').mean()# ‘neg_mean_squared_error’
+cross_val_score(model, train, train_y, cv=cv, scoring='precision').mean()# 'neg_mean_squared_error'
 
 
 # 方差筛选
