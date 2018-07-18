@@ -201,12 +201,13 @@ class TopicModel(object):
         senttopic = self.model[sentcorpus] # 获得测试集的词-主题分布
 
         # 余弦相似度计算
+		# eg:zip(l1,l2),[((0, 0.035089172), (0, 0.6190065)), ((1, 0.03435219), (1, 0.12685764)), ((2, 0.896231), (2, 0.12772126)), ((3, 0.034327652), (3, 0.12641455))],余弦公式为(x1y1+x2y2+x3y3+x4y4)/(math.sqrt(x1^2+x2^2+x3^2+x4^2)*math.sqrt(y1^2+y2^2+y3^2+y4^2))
         def calsim(l1, l2):
             a, b, c = 0.0, 0.0, 0.0
             for t1, t2 in zip(l1, l2):
                 x1 = t1[1]
                 x2 = t2[1]
-                a += x1 * x1
+                a += x1 * x2
                 b += x1 * x1
                 c += x2 * x2
             sim = a / math.sqrt(b * c) if not (b * c) == 0.0 else 0.0
@@ -227,7 +228,7 @@ class TopicModel(object):
 
 
 def tfidf_extract(word_list, pos=False, keyword_num=10):
-    # 此处doc_list训练集，word_list测试集
+    # 此处doc_list训练集获得IDF值，word_list测试集
     doc_list = load_data(pos)
     idf_dic, default_idf = train_idf(doc_list)
     tfidf_model = TfIdf(idf_dic, default_idf, word_list, keyword_num)
@@ -244,7 +245,7 @@ def textrank_extract(text, pos=False, keyword_num=10):
 
 
 def topic_extract(word_list, model, pos=False, keyword_num=10):
-    # 训此处doc_list训练集，word_list测试集
+    # 此处doc_list训练集获得IF-IDF值，进而获得主题词分布，word_list测试集
     doc_list = load_data(pos)
     topic_model = TopicModel(doc_list, keyword_num, model=model)
     topic_model.get_simword(word_list)
