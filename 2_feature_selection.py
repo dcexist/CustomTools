@@ -16,7 +16,7 @@ selector = VarianceThreshold()
 selector.fit(train)
 print np.sort(selector.variances_)
 
-def variance_select(train,train_y,a,b,step,c)：
+def variance_select(train,train_y,a,b,step,c):
 	for i in range(a,b,step):
 		selector = VarianceThreshold(threshold=i/c)
 		selector.fit(train)
