@@ -1,6 +1,8 @@
 # coding=utf-8
 
-from sklearn.ensemble import GradientBoostingClassifier as GBC
+from sklearn.ensemble import GradientBoostingClassifier as GB
+# from sklearn.ensemble import GradientBoostingRegressor as GB
+model=GB(random_state=0)
 
 # 交叉验证
 from sklearn.model_selection import StratifiedKFold
