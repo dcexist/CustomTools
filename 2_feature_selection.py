@@ -25,10 +25,7 @@ for col in var_cols:
     train1=train1.drop(col,axis=1)
     val1=val1.drop(col,axis=1)
     i=i+1
-model=GB(random_state=0)
-model.fit(train1,train_y)
-pred=model.predict(val1)
-print i,np.sqrt(metrics.mean_squared_error(val_y,pred))
+
 
 		
 # 分类-卡方检验
@@ -177,6 +174,23 @@ model =GBC(random_state=0)
 print train.columns[~model.get_support()]
 print round(cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean(),4)
 
+# 基于GDBT输出特征重要性排序
+model=GB(random_state=0)
+model.fit(train,train_y)
+fm_cols=pd.DataFrame(model.feature_importances_,index=train.columns).sort_values(by=0).index
+
+train1=train.copy()
+val1=val.copy()
+i=0# i表示删了几个特征,按照特征重要性排序
+for col in fm_cols:
+    model=GB(random_state=0)
+    model.fit(train1,train_y)
+    pred=model.predict(val1)
+    print i,np.sqrt(metrics.mean_squared_error(val_y,pred))
+    print "_____________________________________" 
+    train1=train1.drop(col,axis=1)
+    val1=val1.drop(col,axis=1)
+    i=i+1
 
 # 基于GDBT的特征选择
 def gdbt_select(train,train_y,a,b,step,c):
