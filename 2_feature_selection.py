@@ -10,7 +10,7 @@ cv=StratifiedKFold(n_splits=5, random_state=0, shuffle=False)
 cross_val_score(model, train, train_y, cv=cv, scoring='precision').mean()# 'neg_mean_squared_error'
 
 
-# 方差筛选
+# 分类和回归--方差筛选(特征需离散化)
 # var_cols 列名按照方差从小到大排序
 var_cols=train.var().sort_values().index
 train1=train.copy()
@@ -28,7 +28,7 @@ for col in var_cols:
 
 
 		
-# 分类-卡方检验
+# 分类--卡方检验
 from sklearn.feature_selection import chi2
 corrlation={}
 for i in range(train.shape[1]):
@@ -44,7 +44,7 @@ def chi2_select(train,train_y):
 		model=SelectKBest(chi2,k=i)
 		train1=model.fit_transform(train,train_y)
 		
-		model=GBC(random_state=0)
+		model=GB(random_state=0)
 		cv_score=cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
@@ -56,7 +56,7 @@ def chi2_select(train,train_y):
 	model=SelectKBest(chi2,k=index).fit(train,train_y)
 	train.columns[~model.get_support()]
 
-# 回归-pearson系数筛选（|r|<=0.3为不存在线性相关；0.3<|r|<=0.5为低度线性相关；0.5<|r|<=0.8为显著线性相关；|r|>0.8为高度线性相关，r之和>1）	
+# 回归--pearson系数筛选（|r|<=0.3为不存在线性相关；0.3<|r|<=0.5为低度线性相关；0.5<|r|<=0.8为显著线性相关；|r|>0.8为高度线性相关，r之和>1）	
 from scipy.stats import pearsonr
 cols=train.columns
 corrlation={}
@@ -65,7 +65,7 @@ for col in cols:
     corrlation[col]=abs(values[0])
 pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=False)
 
-# 回归-spearman系数筛选
+# 回归--spearman系数筛选
 from scipy.stats import spearmanr
 cols=train.columns
 corrlation={}
@@ -74,7 +74,7 @@ for col in cols:
     corrlation[col]=abs(values[0])
 pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=False)
 	
-# 最大信息系数,取值区间在[0，1],之和>1
+# 分类和回归--最大信息系数,取值区间在[0，1],之和>1
 from minepy import MINE
 m=MINE()
 cols=train.columns
@@ -84,7 +84,7 @@ for col in cols:
     corrlation[col]=m.mic()
 pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=False)
 
-# 互信息法筛选
+# 分类和回归--互信息法筛选
 def mutual_info_select(train,train_y):
 	from sklearn.feature_selection import SelectKBest
 	from sklearn.feature_selection import mutual_info_classif
@@ -94,7 +94,7 @@ def mutual_info_select(train,train_y):
 		model=SelectKBest(mutual_info_classif,k=i)
 		a_train=model.fit_transform(train,train_y)
 		
-		model = GBC(random_state=0)
+		model = GB(random_state=0)
 		cv_score=cross_val_score(model, a_train, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
@@ -106,7 +106,7 @@ def mutual_info_select(train,train_y):
 	model=SelectKBest(mutual_info_classif,k=index).fit(train,train_y)
 	train.columns[~model.get_support()]
 
-# 基于相关系数的假设检验(分类-f_classif,回归-f_regression)
+# 分类和回归--基于相关系数的假设检验(分类-f_classif,回归-f_regression)
 def f_classif_select(train,train_y):
 	from sklearn.feature_selection import SelectKBest
 	from sklearn.feature_selection import f_classif
@@ -116,7 +116,7 @@ def f_classif_select(train,train_y):
 		model=SelectKBest(f_classif,k=i)
 		train1=model.fit_transform(train,train_y)
 		
-		model = GBC(random_state=0)
+		model = GB(random_state=0)
 		cv_score=cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
@@ -127,8 +127,8 @@ def f_classif_select(train,train_y):
 	model=SelectKBest(f_classif,k=index).fit(train,train_y)
 	train.columns[~model.get_support()]
 	
-# 基于GDBT的单变量特征选择
-model =GBC(random_state=0)
+# 分类和回归--基于GDBT的单变量特征选择
+model =GB(random_state=0)
 scores=[]
 columns=train.columns
 corrlation={}
@@ -138,15 +138,15 @@ for i in range(train.shape[1]):
     corrlation[columns[i]]=format(np.mean(score),'.4f')
 pd.DataFrame.from_dict(corrlation,orient='index').sort_values(by=[0],ascending=False)
 
-# 递归特征消除
+# 分类和回归--递归特征消除
 # 通过交叉验证自动确定消除特征数目
 from sklearn.feature_selection import RFECV
-model=RFECV(estimator=GBC(random_state=0),step=1,cv=cv,scoring='recall')
+model=RFECV(estimator=GB(random_state=0),step=1,cv=cv,scoring='recall')
 model.fit(train,train_y)
 # 被消除的特征
 print train.columns[~model.support_],np.max(model.grid_scores_)
 
-# 基于L1的LR特征选择
+# 分类--基于L1的LR特征选择
 def L1_select(train,train_y,a,b,step,c):
 	from sklearn.feature_selection import SelectFromModel
 	score=0
@@ -156,7 +156,7 @@ def L1_select(train,train_y,a,b,step,c):
 		model = SelectFromModel(model1,threshold=i/c)
 		model.fit(train,train_y)
 		train1=model.transform(train)
-		model =GBC(random_state=0)
+		model =GB(random_state=0)
 		cv_score=cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
@@ -170,11 +170,11 @@ model = SelectFromModel(model1,threshold=index)
 model.fit(train,train_y)
 train1=model.transform(train)
 
-model =GBC(random_state=0)
+model =GB(random_state=0)
 print train.columns[~model.get_support()]
 print round(cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean(),4)
 
-# 基于GDBT输出特征重要性排序
+# 分类和回归--基于GDBT输出特征重要性排序
 model=GB(random_state=0)
 model.fit(train,train_y)
 fm_cols=pd.DataFrame(model.feature_importances_,index=train.columns).sort_values(by=0).index
@@ -192,18 +192,18 @@ for col in fm_cols:
     val1=val1.drop(col,axis=1)
     i=i+1
 
-# 基于GDBT的特征选择
+# 分类和回归--基于GDBT的特征选择
 def gdbt_select(train,train_y,a,b,step,c):
 	from sklearn.feature_selection import SelectFromModel
 
 	score=0
 	index=0
-	model1=GBC(random_state=0).fit(train.values, train_y.values.reshape(-1,1))
+	model1=GB(random_state=0).fit(train.values, train_y.values.reshape(-1,1))
 	for i in range(a,b,step):
 		model = SelectFromModel(model1,threshold=i/c)
 		model.fit(train,train_y)
 		train1=model.transform(train)
-		model =GBC(random_state=0)
+		model =GB(random_state=0)
 		cv_score=cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean()
 		if score<cv_score:
 			score=cv_score
@@ -216,7 +216,7 @@ model = SelectFromModel(model1,threshold=index)
 model.fit(train,train_y)
 train1=model.transform(train)
 
-model =GBC(random_state=0)
+model =GB(random_state=0)
 print train.columns[~model.get_support()]
 print round(cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean(),4)
 
