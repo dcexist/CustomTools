@@ -46,6 +46,7 @@ metrics.recall_score(test_y,pred)
 
 
 # GBDT 调参
+# scoring参数 http://scikit-learn.org/0.18/modules/model_evaluation.html#scoring-parameter
 from sklearn.model_selection import GridSearchCV
 
 # 调节参数n_estimators
