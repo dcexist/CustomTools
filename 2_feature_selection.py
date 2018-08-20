@@ -11,20 +11,24 @@ cross_val_score(model, train, train_y, cv=cv, scoring='precision').mean()# 'neg_
 
 
 # 方差筛选
-from sklearn.feature_selection import VarianceThreshold
-selector = VarianceThreshold()
-selector.fit(train)
-print np.sort(selector.variances_)
-
-def variance_select(train,train_y,a,b,step,c):
-	for i in range(a,b,step):
-		selector = VarianceThreshold(threshold=i/c)
-		selector.fit(train)
-		train1=selector.transform(train)
-		
-		model=GBC(random_state=0)
-		print round(cross_val_score(model, train1, train_y, cv=cv, scoring='recall').mean(),4)
-		print "_____________________________________"
+# var_cols 列名按照方差从小到大排序
+var_cols=train.var().sort_values().index
+train1=train.copy()
+val1=val.copy()
+i=-1
+for col in var_cols:
+    model=GB(random_state=0)
+    model.fit(train1,train_y)
+    pred=model.predict(val1)
+    print i,np.sqrt(metrics.mean_squared_error(val_y,pred))
+    print "_____________________________________" 
+    train1=train1.drop(col,axis=1)
+    val1=val1.drop(col,axis=1)
+    i=i+1
+model=GB(random_state=0)
+model.fit(train1,train_y)
+pred=model.predict(val1)
+print i,np.sqrt(metrics.mean_squared_error(val_y,pred))
 
 		
 # 分类-卡方检验
