@@ -168,3 +168,16 @@ def discretize(data,col,k):
 	model.fit(data[col].reshape(-1,1))
 	data[col]=pd.DataFrame(model.labels_)
 
+# PCA降维
+
+##计算全部贡献率
+n_components = 400# 取全部特征
+pca = PCA(n_components=n_components)
+pca.fit(x)
+# print pca.explained_variance_ratio_
+
+#PCA作图,查看图中多少成分可以代表全体，然后根据图像取适合维度
+plt.plot(pca.explained_variance_, linewidth=2)
+plt.xlabel('n_components')
+plt.ylabel('explained_variance_')
+plt.show()
