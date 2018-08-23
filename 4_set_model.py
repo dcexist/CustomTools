@@ -5,10 +5,25 @@ from sklearn.model_selection import KFold
 from sklearn.externals import joblib
 
 # SVM调参
+
 param1={'C':range(1,10,1)}
 gsearch1=GridSearchCV(estimator=SVC(),param_grid=param1,scoring='accuracy',n_jobs=4,iid=False,cv=5)
 gsearch1.fit(train,train_y)
 gsearch1.grid_scores_,gsearch1.best_params_,gsearch1.best_score_
+
+# 画roc曲线
+clf = svm.SVC(C = 2, probability = True)# 必须设置为True
+clf.fit(x_pca,y)
+pred_probas = clf.predict_proba(x_pca)[:,1] #score
+
+fpr,tpr,_ = metrics.roc_curve(y, pred_probas)
+roc_auc = metrics.auc(fpr,tpr)
+plt.plot(fpr, tpr, label = 'area = %.2f' % roc_auc)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.legend(loc = 'lower right')
+plt.show()
 
 # Random Forest 调参
 
