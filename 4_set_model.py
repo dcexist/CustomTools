@@ -51,6 +51,8 @@ gsearch4 = GridSearchCV(estimator = RF( n_estimators=gsearch1.best_params_['n_es
 gsearch4.fit(train,train_y)
 gsearch4.grid_scores_, gsearch4.best_params_, gsearch4.best_score_
 
+# 调节参数subsample
+
 # 调参后的Random Forest
 model=RF(n_estimators=gsearch1.best_params_['n_estimators'],max_depth=gsearch2.best_params_['max_depth'], min_samples_leaf =gsearch3.best_params_['min_samples_leaf'], min_samples_split =gsearch3.best_params_['min_samples_split'],max_features=gsearch4.best_params_['max_features'],random_state=0)
 model.fit(train,train_y)
