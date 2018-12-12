@@ -61,7 +61,7 @@ y=data.pop('label')
 train,test,train_y,test_y=train_test_split(data,y,test_size=0.3,random_state=0)
 
 
-# 异常值检测
+# 异常值检测-聚类
 def outlier(df):
 	# 基于聚类的小簇划分法及离群点划分法
 
@@ -125,7 +125,8 @@ def outlier(df):
 	normal_index=[x for x in list(df.index) if x not in list(outlier_index)]
 	df2=df.loc[normal_index,:]
 	train_y1=df2.pop("label")
-	
+
+# 异常值检查-IForest
 	
 
 # 过采样和欠采样
